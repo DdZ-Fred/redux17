@@ -62,10 +62,33 @@ const todoApp = combineReducers({
 
 const store = createStore(todoApp);
 
+// ###############
+//      UTILS
+// ###############
 
-// ####################
-// FilterLink Component
-// ######       #######
+function getVisibleTodos(todos, filter) {
+  switch (filter) {
+    case 'SHOW_ALL': {
+      return todos;
+    }
+    case 'SHOW_ACTIVE': {
+      return todos.filter(t => !t.completed);
+    }
+    case 'SHOW_COMPLETED': {
+      return todos.filter(t => t.completed);
+    }
+    default: {
+      return todos;
+    }
+  }
+}
+
+
+// ###############
+//    COMPONENTS
+// ###############
+
+// ----- FilterLink Component ----- //
 function FilterLink({ filter, currentFilter, children }) {
   if (filter === currentFilter) {
     return <span>{children}</span>;
@@ -85,25 +108,36 @@ function FilterLink({ filter, currentFilter, children }) {
     </a>
   );
 }
-// #######       #######
-// #####################
-
-
-function getVisibleTodos(todos, filter) {
-  switch (filter) {
-    case 'SHOW_ALL': {
-      return todos;
-    }
-    case 'SHOW_ACTIVE': {
-      return todos.filter(t => !t.completed);
-    }
-    case 'SHOW_COMPLETED': {
-      return todos.filter(t => t.completed);
-    }
-    default: {
-      return todos;
-    }
-  }
+// ------------------------------ //
+// ------- Todo Component ------- //
+function Todo({ text, completed, onClick }) {
+  return (
+    <li
+      onClick={onClick}
+      style={{
+        textDecoration:
+          completed ?
+            'line-through' :
+            'none',
+      }}>
+      {text}
+    </li>
+  );
+}
+// ------------------------------ //
+// ------- TodoList Component ------- //
+function TodoList({ todos, onTodoClick }) {
+  return (
+    <ul>
+      {todos.map(todo => (
+        <Todo
+          key={todo.id}
+          {...todo}
+          onClick={() => onTodoClick(todo.id)}
+        />
+      ))}
+    </ul>
+  );
 }
 
 
@@ -140,26 +174,14 @@ class TodoApp extends React.Component {
           });
           this.nextTodoTxtInput.value = '';
         }}>Add Todo</button>
-        <ul>
-          {visibleTodos.map((t) => (
-            <li
-              key={t.id}
-              onClick={() => {
-                store.dispatch({
-                  type: 'TOGGLE_TODO',
-                  id: t.id,
-                });
-              }}
-              style={{
-                textDecoration:
-                  t.completed ?
-                    'line-through' :
-                    'none',
-              }}>
-              {t.text}
-            </li>
-          ))}
-        </ul>
+        <TodoList
+          todos={visibleTodos}
+          onTodoClick={(id) => {
+            store.dispatch({
+              type: 'TOGGLE_TODO',
+              id,
+            });
+          }} />
         <p>
           Show:
           {' '}
