@@ -89,7 +89,7 @@ function getVisibleTodos(todos, filter) {
 // ###############
 
 // ----- FilterLink Component ----- //
-function FilterLink({ filter, currentFilter, children }) {
+function FilterLink({ filter, currentFilter, onClick, children }) {
   if (filter === currentFilter) {
     return <span>{children}</span>;
   }
@@ -98,17 +98,41 @@ function FilterLink({ filter, currentFilter, children }) {
       href="#"
       onClick={(e) => {
         e.preventDefault();
-        store.dispatch({
-          type: 'SET_VISIBILITY_FILTER',
-          filter,
-        });
+        onClick(filter);
       }}
     >
       {children}
     </a>
   );
 }
-// ------------------------------ //
+
+// ------- Footer Component ------- //
+function Footer({ visibilityFilter, onFilterClick }) {
+  return (
+    <p>
+      Show:
+      {' '}
+      <FilterLink
+        filter="SHOW_ALL"
+        currentFilter={visibilityFilter}
+        onClick={onFilterClick}
+      >All</FilterLink>
+      {' '}
+      <FilterLink
+        filter="SHOW_ACTIVE"
+        currentFilter={visibilityFilter}
+        onClick={onFilterClick}
+      >Active</FilterLink>
+      {' '}
+      <FilterLink
+        filter="SHOW_COMPLETED"
+        currentFilter={visibilityFilter}
+        onClick={onFilterClick}
+      >Completed</FilterLink>
+    </p>
+  );
+}
+
 // ------- Todo Component ------- //
 function Todo({ text, completed, onClick }) {
   return (
@@ -124,7 +148,7 @@ function Todo({ text, completed, onClick }) {
     </li>
   );
 }
-// ------------------------------ //
+
 // ------- TodoList Component ------- //
 function TodoList({ todos, onTodoClick }) {
   return (
@@ -140,71 +164,64 @@ function TodoList({ todos, onTodoClick }) {
   );
 }
 
+// ------- AddTodo Component ------- //
+function AddTodo({ onAddClick }) {
+  let input;
+  return (
+    <div>
+      <input ref={(node) => {
+        input = node;
+      }} />
+      <button onClick={() => {
+        onAddClick(input.value);
+        input.value = '';
+      }}>Add Todo</button>
+    </div>
+  );
+}
 
-// #################
-// TODOAPP Component
-// #################
-const propTypes = {
-  todos: PropTypes.array.isRequired,
-  visibilityFilter: PropTypes.string.isRequired,
-};
+// --------------------------------- //
+// ------- TodoApp Component ------- //
 
 let nextTodoId = 0;
-class TodoApp extends React.Component {
-  render() {
-    const {
-      todos,
-      visibilityFilter,
-    } = this.props;
-    const visibleTodos = getVisibleTodos(
-      todos,
-      visibilityFilter
-    );
-    return (
-      <div>
-        {/* ref string will likely be deprecated, ref callbacks prefered!*/}
-        <input ref={(node) => {
-          this.nextTodoTxtInput = node;
-        }} />
-        <button onClick={() => {
+function TodoApp({ todos, visibilityFilter }) {
+  return (
+    <div>
+      {/* ref string will likely be deprecated, ref callbacks prefered!*/}
+      <AddTodo
+        onAddClick={(text) => {
           store.dispatch({
             type: 'ADD_TODO',
             id: nextTodoId++,
-            text: this.nextTodoTxtInput.value,
+            text,
           });
-          this.nextTodoTxtInput.value = '';
-        }}>Add Todo</button>
-        <TodoList
-          todos={visibleTodos}
-          onTodoClick={(id) => {
-            store.dispatch({
-              type: 'TOGGLE_TODO',
-              id,
-            });
-          }} />
-        <p>
-          Show:
-          {' '}
-          <FilterLink
-            filter="SHOW_ALL"
-            currentFilter={visibilityFilter}>All</FilterLink>
-          {' '}
-          <FilterLink
-            filter="SHOW_ACTIVE"
-            currentFilter={visibilityFilter}>Active</FilterLink>
-          {' '}
-          <FilterLink
-            filter="SHOW_COMPLETED"
-            currentFilter={visibilityFilter}>Completed</FilterLink>
-        </p>
-      </div>
-    );
-  }
+        }}
+      />
+      <TodoList
+        todos={getVisibleTodos(todos, visibilityFilter)}
+        onTodoClick={(id) => {
+          store.dispatch({
+            type: 'TOGGLE_TODO',
+            id,
+          });
+        }} />
+      <Footer
+        visibilityFilter={visibilityFilter}
+        onFilterClick={(filter) => {
+          store.dispatch({
+            type: 'SET_VISIBILITY_FILTER',
+            filter,
+          });
+        }}
+      />
+    </div>
+  );
 }
 
-TodoApp.propTypes = propTypes;
-// #######      ########
-// #####################
+
+// ###############
+//    RENDERING
+// ###############
 
 const render = () => {
   ReactDOM.render(
