@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
 
 // Todo reducer
 const todo = (state, action) => {
@@ -253,19 +254,19 @@ AddTodo.contextTypes = contextTypes;
 // --------------------------------- //
 // ------- Provider Component ------- //
 
-class Provider extends React.Component {
-
-  getChildContext() {
-    return {
-      store: this.props.store,
-    };
-  }
-
-  render() {
-    return this.props.children;
-  }
-}
-Provider.childContextTypes = contextTypes;
+// class Provider extends React.Component {
+//
+//   getChildContext() {
+//     return {
+//       store: this.props.store,
+//     };
+//   }
+//
+//   render() {
+//     return this.props.children;
+//   }
+// }
+// Provider.childContextTypes = contextTypes;
 
 
 // --------------------------------- //
