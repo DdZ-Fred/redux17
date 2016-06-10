@@ -5,7 +5,6 @@ const propTypes = {
   onClick: PropTypes.func.isRequired,
 };
 
-
 function Link({ active, onClick, children }) {
   if (active) {
     return <span>{children}</span>;

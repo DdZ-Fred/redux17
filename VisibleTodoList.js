@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import Todo from './Todo';
+import TodoList from './TodoList';
 
 function getVisibleTodos(todos, filter) {
   switch (filter) {
@@ -36,28 +36,9 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const propTypes = {
-  todos: PropTypes.array.isRequired,
-  onTodoClick: PropTypes.func.isRequired,
-};
-
-function TodoList({ todos, onTodoClick }) {
-  return (
-    <ul>
-      {todos.map(todo => (
-        <Todo
-          key={todo.id}
-          {...todo}
-          onClick={() => onTodoClick(todo.id)}
-        />
-      ))}
-    </ul>
-  );
-}
-TodoList.propTypes = propTypes;
-
 const VisibleTodoList = connect(
   mapStateToProps,
-  mapDispatchToProps)(TodoList);
+  mapDispatchToProps
+)(TodoList);
 
 export default VisibleTodoList;
