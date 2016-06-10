@@ -55,12 +55,8 @@ const visibilityFilter = (state = 'SHOW_ALL', action) => {
   }
 };
 
-const todoApp = combineReducers({
-  todos,
-  visibilityFilter,
-});
 
-const store = createStore(todoApp);
+
 
 // ###############
 //      UTILS
@@ -110,11 +106,13 @@ function Link({ active, onClick, children }) {
 class FilterLink extends React.Component {
 
   componentDidMount() {
+    const { store } = this.props;
     this.unsubscribe = store.subscribe(() => this.forceUpdate());
   }
 
   render() {
     const props = this.props;
+    const { store } = props;
     const state = store.getState();
     return (
       <Link
@@ -137,19 +135,25 @@ class FilterLink extends React.Component {
 }
 
 // ------- Footer Component ------- //
-function Footer() {
+function Footer({ store }) {
   return (
     <p>
       Show:
       {' '}
       <FilterLink
-        filter="SHOW_ALL">All</FilterLink>
+        filter="SHOW_ALL"
+        store={store}
+      >All</FilterLink>
       {' '}
       <FilterLink
-        filter="SHOW_ACTIVE">Active</FilterLink>
+        filter="SHOW_ACTIVE"
+        store={store}
+      >Active</FilterLink>
       {' '}
       <FilterLink
-        filter="SHOW_COMPLETED">Completed</FilterLink>
+        filter="SHOW_COMPLETED"
+        store={store}
+      >Completed</FilterLink>
     </p>
   );
 }
@@ -174,11 +178,13 @@ function Todo({ text, completed, onClick }) {
 class VisibleTodoList extends React.Component {
 
   componentDidMount() {
+    const { store } = this.props;
     this.unsubscribe = store.subscribe(() => this.forceUpdate());
   }
 
   render() {
-    // const props = this.props;
+    const props = this.props;
+    const { store } = props;
     const state = store.getState();
     return (
       <TodoList
@@ -217,7 +223,7 @@ function TodoList({ todos, onTodoClick }) {
 
 // ------- AddTodo Component ------- //
 let nextTodoId = 0;
-function AddTodo() {
+function AddTodo({ store }) {
   let input;
   return (
     <div>
@@ -239,16 +245,21 @@ function AddTodo() {
 // --------------------------------- //
 // ------- TodoApp Component ------- //
 
-function TodoApp() {
+function TodoApp({ store }) {
   return (
     <div>
       {/* ref string will likely be deprecated, ref callbacks prefered!*/}
-      <AddTodo />
-      <VisibleTodoList />
-      <Footer />
+      <AddTodo store={store} />
+      <VisibleTodoList store={store} />
+      <Footer store={store} />
     </div>
   );
 }
+
+const todoApp = combineReducers({
+  todos,
+  visibilityFilter,
+});
 
 
 // ###############
@@ -256,6 +267,6 @@ function TodoApp() {
 // ###############
 
 ReactDOM.render(
-  <TodoApp />,
+  <TodoApp store={createStore(todoApp)}/>,
   document.getElementById('app')
 );
