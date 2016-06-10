@@ -88,9 +88,9 @@ function getVisibleTodos(todos, filter) {
 //    COMPONENTS
 // ###############
 
-// ----- FilterLink Component ----- //
-function FilterLink({ filter, currentFilter, onClick, children }) {
-  if (filter === currentFilter) {
+// ----- Filter Component ----- //
+function Link({ active, onClick, children }) {
+  if (active) {
     return <span>{children}</span>;
   }
   return (
@@ -98,7 +98,7 @@ function FilterLink({ filter, currentFilter, onClick, children }) {
       href="#"
       onClick={(e) => {
         e.preventDefault();
-        onClick(filter);
+        onClick();
       }}
     >
       {children}
@@ -106,29 +106,50 @@ function FilterLink({ filter, currentFilter, onClick, children }) {
   );
 }
 
+// ----- FilterLink(Container) Component ----- //
+class FilterLink extends React.Component {
+
+  componentDidMount() {
+    this.unsubscribe = store.subscribe(() => this.forceUpdate());
+  }
+
+  render() {
+    const props = this.props;
+    const state = store.getState();
+    return (
+      <Link
+        active={props.filter === state.visibilityFilter}
+        onCLick={() => {
+          store.dispatch({
+            type: 'SET_VISIBILITY_FILTER',
+            filter: props.filter,
+          });
+        }}
+      >
+        {props.children}
+      </Link>
+    );
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+}
+
 // ------- Footer Component ------- //
-function Footer({ visibilityFilter, onFilterClick }) {
+function Footer() {
   return (
     <p>
       Show:
       {' '}
       <FilterLink
-        filter="SHOW_ALL"
-        currentFilter={visibilityFilter}
-        onClick={onFilterClick}
-      >All</FilterLink>
+        filter="SHOW_ALL">All</FilterLink>
       {' '}
       <FilterLink
-        filter="SHOW_ACTIVE"
-        currentFilter={visibilityFilter}
-        onClick={onFilterClick}
-      >Active</FilterLink>
+        filter="SHOW_ACTIVE">Active</FilterLink>
       {' '}
       <FilterLink
-        filter="SHOW_COMPLETED"
-        currentFilter={visibilityFilter}
-        onClick={onFilterClick}
-      >Completed</FilterLink>
+        filter="SHOW_COMPLETED">Completed</FilterLink>
     </p>
   );
 }
@@ -205,15 +226,7 @@ function TodoApp({ todos, visibilityFilter }) {
             id,
           });
         }} />
-      <Footer
-        visibilityFilter={visibilityFilter}
-        onFilterClick={(filter) => {
-          store.dispatch({
-            type: 'SET_VISIBILITY_FILTER',
-            filter,
-          });
-        }}
-      />
+      <Footer />
     </div>
   );
 }
